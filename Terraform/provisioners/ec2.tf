@@ -1,11 +1,20 @@
 resource "aws_instance" "terraform" {
-    count = length(var.instances)
     ami             = "ami-0220d79f3f480ecf5"
     instance_type   = "t3.micro"
     vpc_security_group_ids =[aws_security_group.allow_ALLs.id]
     tags = {
-        Name = var.instances[count.index]
+        Name = "terraformS"
         terraform = true    
+    }
+
+    provisioner "local-exec" {
+      command = "echo ${self.private_ip} > inventory"
+      on_failure = continue
+    }
+
+    provisioner "local-exec" {
+      command = "echo instance is destroyed"
+      when = destroy
     }
 }
 resource "aws_security_group" "allow_ALLs" {
